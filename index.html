@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dental Prescription Pad</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; padding: 20px; color: #333; }
+  .container { max-width: 960px; margin: 0 auto; }
+  h1 { text-align: center; color: #1a5276; margin-bottom: 16px; font-size: 1.3rem; letter-spacing: 1px; }
+
+  .card { background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .card h2 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
+  label { font-size: 0.78rem; color: #555; display: block; margin-bottom: 3px; }
+  input, select, textarea {
+    width: 100%; padding: 7px 10px; border: 1px solid #ddd; border-radius: 6px;
+    font-size: 0.85rem; color: #333; background: #fafafa; transition: border 0.2s;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: #2980b9; background: #fff; }
+
+  .tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 0; border-bottom: 2px solid #1a5276; }
+  .tab-btn {
+    padding: 7px 14px; border: 1.5px solid #ccc; border-bottom: none; border-radius: 7px 7px 0 0;
+    font-size: 0.78rem; font-weight: 600; cursor: pointer; background: #f5f5f5; color: #666; transition: all 0.15s;
+  }
+  .tab-btn.active { background: #1a5276; color: #fff; border-color: #1a5276; }
+  .tab-btn:hover:not(.active) { background: #d6eaf8; color: #1a5276; }
+  .add-tab-btn {
+    padding: 7px 14px; border: 1.5px dashed #1a5276; border-bottom: none; border-radius: 7px 7px 0 0;
+    font-size: 0.82rem; font-weight: 700; cursor: pointer; background: #eaf4fc; color: #1a5276; transition: all 0.15s;
+  }
+  .add-tab-btn:hover { background: #d6eaf8; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .drug-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  .drug-table thead tr { background: #1a5276; color: #fff; }
+  .drug-table th { padding: 8px 8px; text-align: left; font-weight: 600; }
+  .drug-table tbody tr { border-bottom: 1px solid #eee; transition: background 0.15s; }
+  .drug-table tbody tr:hover { background: #f0f7ff; }
+  .drug-table td { padding: 5px 7px; vertical-align: middle; }
+  .drug-table input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; accent-color: #1a5276; }
+  .drug-table input[type=text], .drug-table select { padding: 4px 5px; font-size: 0.78rem; }
+  .brand-names { font-size: 0.72rem; color: #1a6b2a; font-style: italic; display: block; margin-top: 2px; }
+  .checked-row { background: #eafaf1 !important; }
+
+  .custom-drug-form { background: #f8fbff; border: 1.5px dashed #2980b9; border-radius: 8px; padding: 14px; margin-bottom: 16px; }
+  .custom-drug-form h3 { font-size: 0.82rem; color: #1a5276; font-weight: 700; margin-bottom: 10px; }
+  .custom-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 2fr 2fr auto; gap: 8px; align-items: end; }
+  .add-drug-btn { padding: 7px 14px; background: #1a5276; color: #fff; border: none; border-radius: 6px; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .add-drug-btn:hover { background: #154360; }
+  .custom-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 8px; }
+  .custom-table thead tr { background: #1a5276; color: #fff; }
+  .custom-table th { padding: 7px 8px; text-align: left; }
+  .custom-table tbody tr { border-bottom: 1px solid #eee; }
+  .custom-table td { padding: 5px 7px; vertical-align: middle; }
+  .custom-table input[type=checkbox] { width:16px; height:16px; cursor:pointer; accent-color:#1a5276; }
+  .custom-table input[type=text], .custom-table select { padding: 4px 5px; font-size: 0.78rem; }
+  .del-btn { background: #fdecea; border: none; color: #e74c3c; border-radius: 5px; padding: 4px 8px; cursor: pointer; font-weight: 700; font-size: 0.78rem; }
+  .del-btn:hover { background: #e74c3c; color: #fff; }
+  .empty-custom { color: #aaa; font-size: 0.82rem; text-align: center; padding: 18px; }
+
+  textarea { resize: vertical; min-height: 60px; }
+  .sig-row { display: flex; gap: 20px; align-items: flex-end; }
+  .sig-box { flex: 1; }
+  .sig-line { border-top: 1px solid #333; margin-top: 40px; font-size: 0.75rem; color: #888; text-align: center; padding-top: 4px; }
+
+  .btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+  button.action { padding: 10px 24px; border: none; border-radius: 7px; font-size: 0.88rem; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+  .btn-print { background: #1a5276; color: #fff; }
+  .btn-print:hover { background: #154360; }
+  .btn-reset { background: #e8e8e8; color: #555; }
+  .btn-reset:hover { background: #d5d5d5; }
+  .btn-uncheck { background: #fdebd0; color: #a04000; }
+  .btn-uncheck:hover { background: #f5cba7; }
+
+  /* Toggle brand names button */
+  .toggle-brand-btn {
+    font-size: 0.75rem; padding: 3px 10px; border-radius: 12px; border: 1px solid #1a6b2a;
+    background: #eafaf1; color: #1a6b2a; cursor: pointer; font-weight: 600; margin-left: 10px;
+  }
+  .toggle-brand-btn:hover { background: #1a6b2a; color: #fff; }
+
+  @media print {
+    body { background: #fff; padding: 0; font-size: 10px; }
+    .no-print { display: none !important; }
+    .card { box-shadow: none; border: 1px solid #ccc; margin-bottom: 8px; padding: 10px; border-radius: 0; }
+    input, select, textarea { border: none; background: transparent; padding: 1px; }
+    .drug-table tbody tr:hover, .custom-table tbody tr:hover { background: none; }
+    .drug-row.unchecked, .custom-row.unchecked { display: none; }
+    .checked-row { background: none !important; }
+    .tabs { display: none; }
+    .tab-panel { display: block !important; }
+    .custom-drug-form { display: none; }
+    .brand-names { color: #1a6b2a; }
+    h1 { font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🦷 Dental Clinic Prescription Pad</h1>
+
+  <!-- CLINIC -->
+  <div class="card">
+    <h2>Clinic Details</h2>
+    <div class="grid2" style="margin-bottom:10px">
+      <div><label>Clinic Name</label><input id="clinicName" type="text" placeholder="e.g. Smile Dental Clinic"></div>
+      <div><label>Doctor Name</label><input id="drName" type="text" placeholder="Dr. Full Name"></div>
+    </div>
+    <div class="grid3">
+      <div><label>Address</label><input id="clinicAddr" type="text" placeholder="Street, City"></div>
+      <div><label>Phone</label><input id="clinicPhone" type="text" placeholder="+91 XXXXXXXXXX"></div>
+      <div><label>Registration No.</label><input id="regNo" type="text" placeholder="MCI/State Reg. No."></div>
+    </div>
+  </div>
+
+  <!-- PATIENT -->
+  <div class="card">
+    <h2>Patient Information</h2>
+    <div class="grid4">
+      <div><label>Patient Name</label><input id="patName" type="text" placeholder="Full Name"></div>
+      <div><label>Age</label><input id="patAge" type="number" placeholder="Years" min="1" max="120"></div>
+      <div><label>Gender</label>
+        <select id="patGender"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>
+      </div>
+      <div><label>Date</label><input id="rxDate" type="date"></div>
+    </div>
+    <div style="margin-top:10px">
+      <label>Diagnosis / Chief Complaint</label>
+      <input id="diagnosis" type="text" placeholder="e.g. Acute periapical abscess, Post-extraction, ANUG, Dry socket...">
+    </div>
+  </div>
+
+  <!-- RX -->
+  <div class="card">
+    <h2>
+      ℞ Prescription
+      <button class="toggle-brand-btn no-print" onclick="toggleBrands()">🏷️ Toggle Brand Names</button>
+    </h2>
+    <div class="tabs no-print" id="tabBar"></div>
+    <div id="tabPanels"></div>
+
+    <!-- CUSTOM PANEL -->
+    <div class="tab-panel" id="panel_custom">
+      <div class="custom-drug-form no-print">
+        <h3>➕ Add a Custom Drug</h3>
+        <div class="custom-grid">
+          <div><label>Drug Name</label><input id="c_name" type="text" placeholder="Generic name"></div>
+          <div><label>Dose</label><input id="c_dose" type="text" placeholder="e.g. 500 mg"></div>
+          <div><label>Frequency</label><select id="c_freq"><option>OD</option><option>BD</option><option>TDS</option><option>QID</option><option>SOS</option><option>Single dose</option><option>Weekly</option><option>PRN</option></select></div>
+          <div><label>Duration</label><input id="c_dur" type="text" placeholder="e.g. 5 days"></div>
+          <div><label>Instructions</label><input id="c_inst" type="text" placeholder="e.g. After food"></div>
+          <div><label>Brand Names</label><input id="c_brand" type="text" placeholder="e.g. Augmentin, Mox"></div>
+          <div><label>&nbsp;</label><button class="add-drug-btn" onclick="addCustomDrug()">+ Add</button></div>
+        </div>
+      </div>
+      <div id="customDrugList"></div>
+    </div>
+    <div id="customPrintSection" style="display:none">
+      <table class="drug-table">
+        <thead><tr><th>Drug</th><th>Brand Names</th><th>Dose</th><th>Frequency</th><th>Duration</th><th>Instructions</th></tr></thead>
+        <tbody id="customPrintBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- NOTES -->
+  <div class="card no-print">
+    <h2>Additional Notes / Advice</h2>
+    <textarea id="notes" placeholder="e.g. Avoid hot/spicy food, soft diet, no smoking, follow-up in 3 days..."></textarea>
+  </div>
+  <div class="card" id="notesPrint" style="display:none">
+    <h2>Additional Notes / Advice</h2>
+    <div id="notesPrintText" style="font-size:0.85rem;min-height:30px;"></div>
+  </div>
+
+  <!-- SIGNATURE -->
+  <div class="card">
+    <h2>Doctor's Signature</h2>
+    <div class="sig-row">
+      <div class="sig-box"><div class="sig-line">Doctor's Signature & Stamp</div></div>
+      <div class="sig-box"><label>Date</label><input id="sigDate" type="date"></div>
+      <div class="sig-box"><label>Next Appointment</label><input id="nextAppt" type="date"></div>
+    </div>
+  </div>
+
+  <div class="btn-row no-print">
+    <button class="action btn-uncheck" onclick="uncheckAll()">☐ Uncheck All</button>
+    <button class="action btn-reset" onclick="resetForm()">🔄 Reset All</button>
+    <button class="action btn-print" onclick="printRx()">🖨️ Print Prescription</button>
+  </div>
+</div>
+
+<script>
+const CATS = [
+  { key:"antibiotics", label:"Antibiotics" },
+  { key:"analgesics",  label:"Analgesics" },
+  { key:"antiinflam",  label:"Anti-inflammatory" },
+  { key:"antifungal",  label:"Antifungals" },
+  { key:"rinses",      label:"Rinses & Topicals" },
+  { key:"vitamins",    label:"Vitamins" },
+  { key:"antacid",     label:"Antacids / GI" },
+  { key:"sedatives",   label:"Sedatives" },
+];
+
+const DRUGS = [
+  // ANTIBIOTICS
+  { cat:"antibiotics", name:"Amoxicillin", dose:"500 mg", freq:"TDS", dur:"5 days", inst:"After food", brands:"Mox, Novamox, Amoxil, Cipmox" },
+  { cat:"antibiotics", name:"Amoxicillin + Clavulanate", dose:"625 mg", freq:"BD", dur:"5 days", inst:"After food", brands:"Augmentin, Clavam, Moxclav, Advent" },
+  { cat:"antibiotics", name:"Metronidazole", dose:"400 mg", freq:"TDS", dur:"5 days", inst:"After food", brands:"Flagyl, Metrogyl, Aldezol, Aristogyl" },
+  { cat:"antibiotics", name:"Amoxicillin + Metronidazole", dose:"500+400 mg", freq:"TDS", dur:"5 days", inst:"After food", brands:"Amoxmet, Moxmet, Metaflam" },
+  { cat:"antibiotics", name:"Azithromycin", dose:"500 mg", freq:"OD", dur:"3 days", inst:"Before food", brands:"Zithromax, Azee, Azithral, Azifast" },
+  { cat:"antibiotics", name:"Doxycycline", dose:"100 mg", freq:"BD", dur:"7 days", inst:"With water, after food", brands:"Doxt-S, Doxrid, Microdox, Biodoxi" },
+  { cat:"antibiotics", name:"Clindamycin", dose:"300 mg", freq:"TDS", dur:"5 days", inst:"After food (penicillin allergy)", brands:"Clindac, Dalacin C, Clincin, Klimicin" },
+  { cat:"antibiotics", name:"Ciprofloxacin", dose:"500 mg", freq:"BD", dur:"5 days", inst:"After food", brands:"Ciplox, Cifran, Ciprolet, Neofloxin" },
+  { cat:"antibiotics", name:"Tinidazole", dose:"500 mg", freq:"BD", dur:"5 days", inst:"After food", brands:"Tiniba, Fasigyn, Tinimet, Tinitab" },
+
+  // ANALGESICS
+  { cat:"analgesics", name:"Ibuprofen", dose:"400 mg", freq:"TDS", dur:"3 days", inst:"After food", brands:"Brufen, Ibugesic, Combiflam (combo), Advil" },
+  { cat:"analgesics", name:"Ibuprofen + Paracetamol", dose:"400+325 mg", freq:"TDS", dur:"3 days", inst:"After food", brands:"Combiflam, Ibugesic Plus, Febrex Plus" },
+  { cat:"analgesics", name:"Paracetamol", dose:"500 mg", freq:"TDS/SOS", dur:"3 days", inst:"After food", brands:"Crocin, Dolo 650, Calpol, Pacimol" },
+  { cat:"analgesics", name:"Paracetamol + Tramadol", dose:"325+37.5 mg", freq:"BD", dur:"3 days", inst:"After food", brands:"Ultracet, Tramacip-P, Dolowin Plus" },
+  { cat:"analgesics", name:"Diclofenac + Paracetamol", dose:"50+500 mg", freq:"BD", dur:"3 days", inst:"After food", brands:"Voveran Plus, Diclopar, Reactin Plus" },
+  { cat:"analgesics", name:"Aceclofenac", dose:"100 mg", freq:"BD", dur:"3 days", inst:"After food", brands:"Zerodol, Hifenac, Acenac, Movonac" },
+  { cat:"analgesics", name:"Aceclofenac + Paracetamol", dose:"100+325 mg", freq:"BD", dur:"3 days", inst:"After food", brands:"Zerodol-P, Hifenac-P, Aceclo-P" },
+  { cat:"analgesics", name:"Mefenamic Acid", dose:"500 mg", freq:"TDS", dur:"3 days", inst:"After food", brands:"Meftal, Ponstan, Dynapar MF, Namic" },
+  { cat:"analgesics", name:"Ketorolac", dose:"10 mg", freq:"TDS", dur:"3 days", inst:"After food (short-term)", brands:"Toradol, Ketanov, Ketorol, Ketlur" },
+  { cat:"analgesics", name:"Tramadol", dose:"50 mg", freq:"BD", dur:"3 days", inst:"After food", brands:"Tramazac, Ultram, Contramal, Tramacip" },
+
+  // ANTI-INFLAMMATORY
+  { cat:"antiinflam", name:"Diclofenac Sodium", dose:"50 mg", freq:"BD", dur:"3 days", inst:"After food", brands:"Voveran, Diclogesic, Voltaren, Dynapar" },
+  { cat:"antiinflam", name:"Dexamethasone", dose:"0.5 mg", freq:"OD", dur:"3 days", inst:"Morning after food", brands:"Decadron, Dexona, Wymesone, Dexacort" },
+  { cat:"antiinflam", name:"Betamethasone", dose:"0.5 mg", freq:"OD", dur:"5 days", inst:"After food", brands:"Betnesol, Celestamine, Betacortil" },
+  { cat:"antiinflam", name:"Prednisolone", dose:"5 mg", freq:"OD", dur:"5 days", inst:"Morning after food", brands:"Wysolone, Omnacortil, Deltacortril" },
+  { cat:"antiinflam", name:"Trypsin + Chymotrypsin", dose:"1 tab", freq:"BD", dur:"5 days", inst:"Empty stomach", brands:"Chymoral Forte, Enzomac, Trybest" },
+  { cat:"antiinflam", name:"Serratiopeptidase", dose:"10 mg", freq:"BD", dur:"5 days", inst:"Empty stomach", brands:"Serratace, Serlide, Rofeta, Sermase" },
+
+  // ANTIFUNGALS
+  { cat:"antifungal", name:"Fluconazole", dose:"150 mg", freq:"OD", dur:"7 days", inst:"Before food", brands:"Zocon, Diflucan, Forcan, Syscan" },
+  { cat:"antifungal", name:"Clotrimazole Cream (Topical)", dose:"Apply thin layer", freq:"BD", dur:"14 days", inst:"Apply to lesion after meals", brands:"Candid, Clotrimix, Fungistat, Canesten" },
+  { cat:"antifungal", name:"Nystatin Oral Drops", dose:"1 ml (100,000 IU)", freq:"QID", dur:"14 days", inst:"Swish and swallow", brands:"Mycostatin, Nystop, Biofungix" },
+  { cat:"antifungal", name:"Miconazole Gel (Oral)", dose:"2.5 ml", freq:"QID", dur:"14 days", inst:"Apply after meals, don't eat for 30 min", brands:"Daktarin Oral Gel, Fungitop Gel" },
+
+  // RINSES & TOPICALS
+  { cat:"rinses", name:"Chlorhexidine 0.2% Mouthwash", dose:"10 ml", freq:"BD", dur:"7 days", inst:"Rinse 30 sec, spit — don't swallow", brands:"Hexidine, Clohex, Rexidine, Periogard" },
+  { cat:"rinses", name:"Povidone Iodine Mouthwash", dose:"10 ml", freq:"TDS", dur:"5 days", inst:"Gargle & spit", brands:"Betadine Gargle, Wokadine, Iodin" },
+  { cat:"rinses", name:"Hydrogen Peroxide 1.5% Rinse", dose:"10 ml", freq:"BD", dur:"5 days", inst:"Dilute & rinse, spit", brands:"Hibitane, Oroxide, H2O2 Rinse" },
+  { cat:"rinses", name:"Benzydamine HCl Mouthwash", dose:"15 ml", freq:"TDS", dur:"7 days", inst:"Rinse 30 sec, spit", brands:"Tantum Verde, Difflam, Benzyral" },
+  { cat:"rinses", name:"Triamcinolone Acetonide Gel 0.1%", dose:"Apply thin layer", freq:"BD-TDS", dur:"7 days", inst:"Apply on ulcer after meals", brands:"Kenacort Orabase, Tricort, Ledercort" },
+  { cat:"rinses", name:"Lidocaine Viscous 2%", dose:"5 ml", freq:"SOS", dur:"PRN", inst:"Swish & spit before meals", brands:"Xylocaine Viscous, Lignocaine Gel, Lidox" },
+  { cat:"rinses", name:"Zinc Oxide Eugenol Dressing", dose:"As required", freq:"Single dose", dur:"As needed", inst:"Applied by dentist for dry socket", brands:"IRM, Kalzinol, ZOE Cement" },
+  { cat:"rinses", name:"Aloe Vera Gel (Oral)", dose:"Apply thin layer", freq:"TDS", dur:"7 days", inst:"Apply on ulcer/irritated mucosa", brands:"Aloe Vera Oral Gel, Mucopain, Mucogel" },
+
+  // VITAMINS
+  { cat:"vitamins", name:"Vitamin C (Ascorbic Acid)", dose:"500 mg", freq:"BD", dur:"14 days", inst:"After food", brands:"Celin, Limcee, Redoxon, Ester-C" },
+  { cat:"vitamins", name:"Vitamin B-Complex", dose:"1 tab", freq:"OD", dur:"30 days", inst:"After food", brands:"Becosules, Neurobion, B-Long, Polybion" },
+  { cat:"vitamins", name:"Vitamin B12 (Methylcobalamin)", dose:"500 mcg", freq:"OD", dur:"30 days", inst:"After food", brands:"Mecobalamin, Methylcobal, Cobadex CZS" },
+  { cat:"vitamins", name:"Folic Acid", dose:"5 mg", freq:"OD", dur:"30 days", inst:"After food", brands:"Folvite, Folirich, Folicare" },
+  { cat:"vitamins", name:"Zinc Sulphate", dose:"20 mg", freq:"OD", dur:"30 days", inst:"After food", brands:"Zincovit, Zincofer, Z&D, Zinconia" },
+  { cat:"vitamins", name:"Calcium + Vitamin D3", dose:"500+250 IU", freq:"BD", dur:"30 days", inst:"After food", brands:"Shelcal, Calcirol, Calcimax, Ostocalcium" },
+
+  // ANTACIDS
+  { cat:"antacid", name:"Pantoprazole", dose:"40 mg", freq:"OD", dur:"5 days", inst:"Before breakfast", brands:"Pan, Pantocid, Pantodar, Protonix" },
+  { cat:"antacid", name:"Omeprazole", dose:"20 mg", freq:"OD", dur:"5 days", inst:"Before food", brands:"Omez, Prilosec, Ocid, Lomac" },
+  { cat:"antacid", name:"Ranitidine", dose:"150 mg", freq:"BD", dur:"5 days", inst:"Before food", brands:"Rantac, Zinetac, Aciloc, Zantac" },
+
+  // SEDATIVES
+  { cat:"sedatives", name:"Diazepam", dose:"5 mg", freq:"Single dose", dur:"Night before procedure", inst:"At bedtime", brands:"Valium, Calmpose, Paxum, Diastat" },
+  { cat:"sedatives", name:"Alprazolam", dose:"0.25 mg", freq:"OD", dur:"3 days", inst:"At bedtime", brands:"Alprax, Xanax, Restyl, Alzolam" },
+  { cat:"sedatives", name:"Triazolam", dose:"0.25 mg", freq:"Single dose", dur:"1 hr before procedure", inst:"Do not drive", brands:"Halcion, Triazolam (limited brands in India)" },
+];
+
+const FREQS = ["OD","BD","TDS","QID","SOS","TDS/SOS","BD-TDS","Single dose","Weekly","PRN","As needed"];
+let customDrugs = [];
+let customIdCounter = 0;
+let activeTab = 'antibiotics';
+let showBrands = true;
+
+function toggleBrands() {
+  showBrands = !showBrands;
+  document.querySelectorAll('.brand-names').forEach(el => {
+    el.style.display = showBrands ? 'block' : 'none';
+  });
+}
+
+function buildTabs() {
+  const bar = document.getElementById('tabBar');
+  bar.innerHTML = '';
+  CATS.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (c.key === activeTab ? ' active' : '');
+    btn.textContent = c.label;
+    btn.dataset.key = c.key;
+    btn.onclick = () => switchTab(c.key);
+    bar.appendChild(btn);
+  });
+  const cBtn = document.createElement('button');
+  cBtn.className = 'tab-btn' + (activeTab === 'custom' ? ' active' : '');
+  cBtn.id = 'customTabBtn';
+  cBtn.dataset.key = 'custom';
+  cBtn.textContent = '➕ Custom';
+  cBtn.onclick = () => switchTab('custom');
+  bar.appendChild(cBtn);
+  const aBtn = document.createElement('button');
+  aBtn.className = 'add-tab-btn';
+  aBtn.textContent = '+ New Tab';
+  aBtn.onclick = addNewTab;
+  bar.appendChild(aBtn);
+}
+
+function switchTab(key) {
+  activeTab = key;
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  const p = document.getElementById('panel_' + key);
+  if (p) p.classList.add('active');
+  buildTabs();
+  const p2 = document.getElementById('panel_' + key);
+  if (p2) p2.classList.add('active');
+}
+
+function buildPanels() {
+  const container = document.getElementById('tabPanels');
+  container.innerHTML = '';
+  CATS.forEach(c => {
+    const panel = document.createElement('div');
+    panel.className = 'tab-panel' + (c.key === activeTab ? ' active' : '');
+    panel.id = 'panel_' + c.key;
+    const catDrugs = DRUGS.filter(d => d.cat === c.key);
+    let rows = catDrugs.map((d, li) => {
+      const gid = c.key + '_' + li;
+      return `<tr class="drug-row" id="row_${gid}">
+        <td><input type="checkbox" id="chk_${gid}" onchange="highlightRow('${gid}')"></td>
+        <td>
+          <strong>${d.name}</strong>
+          <span class="brand-names" id="brand_${gid}" style="display:${showBrands?'block':'none'}">🏷️ ${d.brands}</span>
+        </td>
+        <td><input type="text" id="dose_${gid}" value="${d.dose}"></td>
+        <td><select id="freq_${gid}">${FREQS.map(f=>`<option ${f===d.freq?'selected':''}>${f}</option>`).join('')}</select></td>
+        <td><input type="text" id="dur_${gid}" value="${d.dur}"></td>
+        <td><input type="text" id="inst_${gid}" value="${d.inst}"></td>
+      </tr>`;
+    }).join('');
+    panel.innerHTML = `
+      <table class="drug-table">
+        <thead><tr>
+          <th style="width:36px">✓</th>
+          <th>Drug Name <span style="font-weight:400;font-size:0.72rem;color:#aef">(brand names in green)</span></th>
+          <th style="width:110px">Dose</th>
+          <th style="width:90px">Frequency</th>
+          <th style="width:80px">Duration</th>
+          <th>Instructions</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+    container.appendChild(panel);
+  });
+}
+
+function highlightRow(gid) {
+  const row = document.getElementById('row_' + gid);
+  const chk = document.getElementById('chk_' + gid);
+  if (row && chk) row.classList.toggle('checked-row', chk.checked);
+}
+
+function addCustomDrug() {
+  const name = document.getElementById('c_name').value.trim();
+  if (!name) { alert('Please enter a drug name.'); return; }
+  customDrugs.push({
+    id: ++customIdCounter,
+    name,
+    dose: document.getElementById('c_dose').value.trim() || '—',
+    freq: document.getElementById('c_freq').value,
+    dur: document.getElementById('c_dur').value.trim() || '—',
+    inst: document.getElementById('c_inst').value.trim() || '—',
+    brands: document.getElementById('c_brand').value.trim() || '—',
+    checked: false
+  });
+  ['c_name','c_dose','c_dur','c_inst','c_brand'].forEach(id => document.getElementById(id).value = '');
+  renderCustomTable();
+}
+
+function renderCustomTable() {
+  const el = document.getElementById('customDrugList');
+  if (!customDrugs.length) {
+    el.innerHTML = '<div class="empty-custom">No custom drugs added yet. Use the form above to add.</div>';
+    return;
+  }
+  let rows = customDrugs.map(d => `
+    <tr class="custom-row${d.checked?' checked-row':''}" id="crow_${d.id}">
+      <td><input type="checkbox" ${d.checked?'checked':''} onchange="toggleCustom(${d.id}, this)"></td>
+      <td>
+        <strong>${d.name}</strong>
+        <span class="brand-names" style="display:${showBrands?'block':'none'}">🏷️ ${d.brands}</span>
+      </td>
+      <td><input type="text" value="${d.dose}" oninput="updateCustom(${d.id},'dose',this.value)"></td>
+      <td><select onchange="updateCustom(${d.id},'freq',this.value)">${FREQS.map(f=>`<option ${f===d.freq?'selected':''}>${f}</option>`).join('')}</select></td>
+      <td><input type="text" value="${d.dur}" oninput="updateCustom(${d.id},'dur',this.value)"></td>
+      <td><input type="text" value="${d.inst}" oninput="updateCustom(${d.id},'inst',this.value)"></td>
+      <td><button class="del-btn" onclick="deleteCustom(${d.id})">✕</button></td>
+    </tr>`).join('');
+  el.innerHTML = `
+    <table class="custom-table">
+      <thead><tr><th style="width:36px">✓</th><th>Drug / Brand</th><th>Dose</th><th>Frequency</th><th>Duration</th><th>Instructions</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function toggleCustom(id, el) {
+  const d = customDrugs.find(x => x.id === id);
+  if (d) { d.checked = el.checked; renderCustomTable(); }
+}
+function updateCustom(id, field, val) {
+  const d = customDrugs.find(x => x.id === id);
+  if (d) d[field] = val;
+}
+function deleteCustom(id) {
+  customDrugs = customDrugs.filter(x => x.id !== id);
+  renderCustomTable();
+}
+
+function addNewTab() {
+  const name = prompt('Enter new tab name (e.g. Haemostatics, Local Anaesthetics):');
+  if (!name || !name.trim()) return;
+  const key = 'user_' + Date.now();
+  CATS.push({ key, label: name.trim() });
+  const container = document.getElementById('tabPanels');
+  const panel = document.createElement('div');
+  panel.className = 'tab-panel';
+  panel.id = 'panel_' + key;
+  panel.innerHTML = `
+    <div class="custom-drug-form no-print">
+      <h3>➕ Add Drug to "${name.trim()}"</h3>
+      <div class="custom-grid">
+        <div><label>Drug Name</label><input type="text" id="u_name_${key}" placeholder="Generic name"></div>
+        <div><label>Dose</label><input type="text" id="u_dose_${key}" placeholder="e.g. 500 mg"></div>
+        <div><label>Frequency</label><select id="u_freq_${key}">${FREQS.map(f=>`<option>${f}</option>`).join('')}</select></div>
+        <div><label>Duration</label><input type="text" id="u_dur_${key}" placeholder="e.g. 5 days"></div>
+        <div><label>Instructions</label><input type="text" id="u_inst_${key}" placeholder="e.g. After food"></div>
+        <div><label>Brand Names</label><input type="text" id="u_brand_${key}" placeholder="e.g. Augmentin, Mox"></div>
+        <div><label>&nbsp;</label><button class="add-drug-btn" onclick="addUserTabDrug('${key}')">+ Add</button></div>
+      </div>
+    </div>
+    <div id="userTabList_${key}"><div class="empty-custom">No drugs added yet.</div></div>`;
+  container.appendChild(panel);
+  buildTabs();
+  switchTab(key);
+}
+
+function addUserTabDrug(key) {
+  const name = document.getElementById('u_name_' + key).value.trim();
+  if (!name) { alert('Please enter a drug name.'); return; }
+  DRUGS.push({
+    cat: key,
+    name,
+    dose: document.getElementById('u_dose_' + key).value.trim() || '—',
+    freq: document.getElementById('u_freq_' + key).value,
+    dur: document.getElementById('u_dur_' + key).value.trim() || '—',
+    inst: document.getElementById('u_inst_' + key).value.trim() || '—',
+    brands: document.getElementById('u_brand_' + key).value.trim() || '—',
+  });
+  renderUserTabPanel(key);
+  ['u_name_','u_dose_','u_dur_','u_inst_','u_brand_'].forEach(p => { const el = document.getElementById(p+key); if(el) el.value=''; });
+}
+
+function renderUserTabPanel(key) {
+  const list = document.getElementById('userTabList_' + key);
+  const catDrugs = DRUGS.filter(d => d.cat === key);
+  if (!catDrugs.length) { list.innerHTML = '<div class="empty-custom">No drugs added yet.</div>'; return; }
+  let rows = catDrugs.map((d, li) => {
+    const gid = key + '_' + li;
+    return `<tr class="drug-row" id="row_${gid}">
+      <td><input type="checkbox" id="chk_${gid}" onchange="highlightRow('${gid}')"></td>
+      <td>
+        <strong>${d.name}</strong>
+        <span class="brand-names" style="display:${showBrands?'block':'none'}">🏷️ ${d.brands}</span>
+      </td>
+      <td><input type="text" value="${d.dose}"></td>
+      <td><select>${FREQS.map(f=>`<option ${f===d.freq?'selected':''}>${f}</option>`).join('')}</select></td>
+      <td><input type="text" value="${d.dur}"></td>
+      <td><input type="text" value="${d.inst}"></td>
+      <td><button class="del-btn" onclick="deleteUserDrug('${key}',${li})">✕</button></td>
+    </tr>`;
+  }).join('');
+  list.innerHTML = `
+    <table class="custom-table">
+      <thead><tr><th style="width:36px">✓</th><th>Drug / Brand</th><th>Dose</th><th>Frequency</th><th>Duration</th><th>Instructions</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function deleteUserDrug(key, idx) {
+  const catDrugs = DRUGS.filter(d => d.cat === key);
+  const drug = catDrugs[idx];
+  const gi = DRUGS.indexOf(drug);
+  if (gi > -1) DRUGS.splice(gi, 1);
+  renderUserTabPanel(key);
+}
+
+function uncheckAll() {
+  document.querySelectorAll('.drug-row input[type=checkbox]').forEach(c => {
+    c.checked = false;
+    const row = c.closest('tr');
+    if (row) row.classList.remove('checked-row');
+  });
+  customDrugs.forEach(d => d.checked = false);
+  renderCustomTable();
+}
+
+function printRx() {
+  document.getElementById('notesPrintText').innerText = document.getElementById('notes').value || '—';
+  document.getElementById('notesPrint').style.display = 'block';
+
+  document.querySelectorAll('.drug-row').forEach(row => {
+    const chk = row.querySelector('input[type=checkbox]');
+    row.classList.toggle('unchecked', !(chk && chk.checked));
+  });
+
+  const checked = customDrugs.filter(d => d.checked);
+  const cpSection = document.getElementById('customPrintSection');
+  const cpBody = document.getElementById('customPrintBody');
+  if (checked.length) {
+    cpBody.innerHTML = checked.map(d =>
+      `<tr><td><strong>${d.name}</strong><span class="brand-names">🏷️ ${d.brands}</span></td><td>${d.dose}</td><td>${d.freq}</td><td>${d.dur}</td><td>${d.inst}</td></tr>`
+    ).join('');
+    cpSection.style.display = 'block';
+  }
+
+  window.print();
+
+  setTimeout(() => {
+    document.getElementById('notesPrint').style.display = 'none';
+    cpSection.style.display = 'none';
+    document.querySelectorAll('.drug-row').forEach(r => r.classList.remove('unchecked'));
+  }, 1200);
+}
+
+function resetForm() {
+  if (!confirm('Reset all fields and uncheck all drugs?')) return;
+  ['clinicName','drName','clinicAddr','clinicPhone','regNo',
+   'patName','patAge','patGender','rxDate','diagnosis','notes','sigDate','nextAppt']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  uncheckAll();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('rxDate').value = today;
+  document.getElementById('sigDate').value = today;
+  buildPanels();
+  buildTabs();
+  renderCustomTable();
+  switchTab('antibiotics');
+});
+</script>
+</body>
+</html>
